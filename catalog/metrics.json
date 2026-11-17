@@ -1,0 +1,12 @@
+{
+  "metrics": {
+    "revenue": {"description": "USD sales revenue from completed orders, excluding pending and cancelled orders. No taxes, refunds, or discounts are modeled.", "expression": "SUM(i.quantity * i.unit_price)", "filter": "o.status = 'completed'", "example_total": "700.00"},
+    "completed_orders": {"description": "Number of distinct completed orders. Joining line items duplicates orders; always count distinct IDs.", "expression": "COUNT(DISTINCT o.order_id)", "filter": "o.status = 'completed'", "example_total": 4},
+    "average_order_value": {"description": "Completed-order revenue divided by distinct completed orders; NULL when there are no completed orders.", "expression": "SUM(i.quantity * i.unit_price) / NULLIF(COUNT(DISTINCT o.order_id), 0)", "filter": "o.status = 'completed'", "example_total": "175.00"}
+  },
+  "dimensions": {"month": "DATE_TRUNC('month', o.order_date)", "region": "c.region", "category": "p.category", "product": "p.name"},
+  "examples": [
+    {"question": "What is our total revenue and completed order count?", "sql": "SELECT SUM(i.quantity * i.unit_price) AS revenue, COUNT(DISTINCT o.order_id) AS completed_orders FROM sales_demo.orders o JOIN sales_demo.order_items i ON o.order_id = i.order_id WHERE o.status = 'completed'"},
+    {"question": "What is revenue by month?", "sql": "SELECT DATE_TRUNC('month', o.order_date) AS month, SUM(i.quantity * i.unit_price) AS revenue FROM sales_demo.orders o JOIN sales_demo.order_items i ON o.order_id = i.order_id WHERE o.status = 'completed' GROUP BY DATE_TRUNC('month', o.order_date) ORDER BY month"}
+  ]
+}
